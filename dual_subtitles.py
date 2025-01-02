@@ -1,3 +1,6 @@
+# TODO handle :
+# "femaleVariant": "<kiroshi l=\"jpn\" o=\"お父様\" t=\"Ojcze.\" b=\"\" a=\"\"/> \\n<kiroshi l=\"jpn\" o=\"お父様\" t=\"Père.\" b=\"\" a=\"\"/>",
+
 import os
 import shutil
 import subprocess
@@ -128,8 +131,12 @@ def open_ui_dialog():
     folder_entry.insert(0, r"E:\SteamLibrary\steamapps\common\Cyberpunk 2077")
     folder_entry.grid(row=2, column=1)
 
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    # Construct the desired path
+    target_path = os.path.join(base_path, "WolvenKit")
+
     folder2_entry = tk.Entry(window)
-    folder2_entry.insert(0, r"C:\Users\kurza\Downloads\WolvenKit")
+    folder2_entry.insert(0, target_path)
     folder2_entry.grid(row=3, column=1)
 
     # Create an Apply button to call the apply() function
@@ -307,7 +314,7 @@ def merge_json_translations_with_separator(folder1: str, folder2: str):
             
             print(f"Merged translations for {filename}")
 
-def move_and_override_files(src_folder: str):
+def move_and_override_files(src_folder: str, subfolder_name):
     """
     Moves files from the given folder into subfolders within a 'base' subfolder, 
     overriding files with the same name.
@@ -316,7 +323,7 @@ def move_and_override_files(src_folder: str):
         src_folder (str): Path to the source folder containing files and the 'base' subfolder.
     """
     # Define the base subfolder path
-    base_folder = os.path.join(src_folder, "base")
+    base_folder = os.path.join(src_folder, subfolder_name)
     
     # Ensure the base folder exists
     if not os.path.exists(base_folder):
@@ -328,7 +335,7 @@ def move_and_override_files(src_folder: str):
         item_path = os.path.join(src_folder, item)
         
         # Skip the base folder and non-files
-        if item == "base" or not os.path.isfile(item_path):
+        if item == subfolder_name or not os.path.isfile(item_path):
             continue
         
         # Search for matching files in subfolders of the base folder
@@ -415,7 +422,7 @@ def convert_cr2w_to_json2(folder_path, kit_folder):
     
     print(f"Conversion and file organization complete.")
 
-def extract_archives(source_lang, target_lang, location, content_suffix , kit_folder):
+def extract_archives(source_lang, target_lang, location, content_suffix , kit_folder, subfolder_name):
     """
     Extracts the specified language archives for Cyberpunk 2077.
 
@@ -505,7 +512,7 @@ def extract_archives(source_lang, target_lang, location, content_suffix , kit_fo
 
     convert_json_to_cr2w(target_output_dir, kit_folder)
 
-    move_and_override_files(target_output_dir)
+    move_and_override_files(target_output_dir, subfolder_name)
 
     print(f"Archiving {target_output_dir} into {archive_dir}...")
     run_with_redirect([exe_path, "pack", "-p", target_output_dir, "-o", archive_dir], check=True)
@@ -520,8 +527,8 @@ def process_files(source_lang, target_lang, location, kit_folder):
     merged = False
     print("Starting " + source_lang + " " + target_lang + " " + location) 
 
-    extract_archives(source_lang, target_lang, location, "content", kit_folder);
-    extract_archives(source_lang, target_lang, location, "ep1", kit_folder);
+    extract_archives(source_lang, target_lang, location, "content", kit_folder, "base");
+    extract_archives(source_lang, target_lang, location, "ep1", kit_folder, "ep1");
 
     progress_bar.stop()
    
